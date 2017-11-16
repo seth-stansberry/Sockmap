@@ -4,6 +4,7 @@ import socket
 import sys
 
 #TODO: Work in YAML
+#forked from @doyler. Check out his website. Placeholder until I put a readme.md together.
 clearbit.key = ''
 # --------------- Helpers that build all of the responses ----------------------
 
