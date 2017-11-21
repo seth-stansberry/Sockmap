@@ -2,6 +2,7 @@ from __future__ import print_function
 import clearbit
 import socket
 import sys
+import pandas as pd
 
 #TODO: Work in YAML
 #forked from @doyler. Check out his website. Placeholder until I put a readme.md together.
@@ -48,7 +49,7 @@ def get_welcome_response():
     card_title = "Welcome"
     speech_output = "Welcome to the Alexa Port Scanner. "\
                     "Please scan a site by saying, "\
-                    "Port Scan doyler.net"
+                    "Port Scan doyler."
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
     reprompt_text = "Please tell me a site you'd like to scan by saying, " \
@@ -57,6 +58,13 @@ def get_welcome_response():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
+# TODO test and refactor
+intent_csv = pd.read_csv(fortune1000.csv) # read rows into a dictionary format
+company_name = intent_csv.name # read a row as {column1: value1, column2: value2,...}
+
+"""print(columns['name'])
+print(columns['phone'])
+print(columns['street'])"""
 
 def handle_session_end_request():
     card_title = "Session Ended"
@@ -67,8 +75,9 @@ def handle_session_end_request():
     return build_response({}, build_speechlet_response(
         card_title, speech_output, None, should_end_session))
 
+# TODO test and refactor
 def scan_site_clearbit(intent, session):
-    if 'Site' in intent['slots']:
+    if 'company' intent['slots']:
         host = intent['slots']['Site']['value']
     company_scan = clearbit.Company.find(domain=['company'],stream=True)
     for ['domain'] in company_scan:
