@@ -59,8 +59,8 @@ def get_welcome_response():
         card_title, speech_output, reprompt_text, should_end_session))
 
 # TODO test and refactor
-intent_csv = pd.read_csv(fortune1000.csv) # read rows into a dictionary format
-company_name = intent_csv.name # read a row as {column1: value1, column2: value2,...}
+intent_csv = pd.read_csv('fortune1000.csv') # read rows into a dictionary format
+company_name = intent_csv.Title # read a row as {column1: value1, column2: value2,...}
 
 """print(columns['name'])
 print(columns['phone'])
@@ -77,37 +77,36 @@ def handle_session_end_request():
 
 # TODO test and refactor
 def scan_site_clearbit(intent, session):
-    if 'company' intent['slots']:
+    if ['company'] in intent['slots']:
         host = intent['slots']['Site']['value']
-    company_scan = clearbit.Company.find(domain=['company'],stream=True)
-    for ['domain'] in company_scan:
-	host=['domain']
+    company_scan = clearbit.Company.find(['company'],stream=True)
+    for tmp in company_scan["*"]:
+	host = ['domain']
     card_title = intent['name']
     session_attributes = {}
     open_ports = []
     should_end_session = False
+    ports = [22, 23, 80, 443, 445, 3389]
 
-        ports = [22, 23, 80, 443, 445, 3389]
+    for port in ports:
+	    try:
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.settimeout(5)
+		result = s.connect_ex((host, port))
+		if result == 0:
+		    session_attributes[port] = 'open'
+		    open_ports.append(port)
+		    print(str(open_ports))
+		s.close()
+	    except:
+		print("Unexpected error:" + str(sys.exc_info()[0]))
+		pass
 
-        for port in ports:
-            try:
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.settimeout(5)
-                result = s.connect_ex((host, port))
-                if result == 0:
-                    session_attributes[port] = 'open'
-                    open_ports.append(port)
-                    print(str(open_ports))
-                s.close()
-            except:
-                print("Unexpected error:" + str(sys.exc_info()[0]))
-                pass
-        
-        speech_output = "The following ports are open on doyler.net " + \
-                        str(open_ports) + \
-                        "."
-        reprompt_text = "You can ask me to scan a different site by saying, " \
-                        "Port Scan r4y.pw"
+	    speech_output = "The following ports are open on doyler.net " + \
+				str(open_ports) + \
+				"."
+	    reprompt_text = "You can ask me to scan a different site by saying, " \
+				"Port Scan r4y.pw"
     else:
         speech_output = "I'm not sure what site you want to scan. " \
                         "Please try again."
@@ -150,7 +149,7 @@ def on_intent(intent_request, session):
 
     # Dispatch to your skill's intent handlers
     if intent_name == "PortScanIntent":
-        return scan_site(intent, session)
+        return scan_(intent, session)
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
